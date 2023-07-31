@@ -1,7 +1,8 @@
 const { connection } = require("../../db/dbConnect");
 
 const getQuestionsRoute = (req, res) => {
-  const sql = "SELECT * FROM questions";
+  const sql =
+    "SELECT * FROM `questions` GROUP BY `id` ORDER BY RAND() LIMIT 0, 10";
   connection.query(sql, (err, results) => {
     if (err) {
       console.error("Error fetching questions:", err);
