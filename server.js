@@ -1,13 +1,12 @@
 const express = require("express");
 const mysql = require("mysql2");
-const routes = require("./routers/routes");
 const cors = require("cors");
 
 const app = express();
 
-// Create a database connection
+// connection
 const connection = mysql.createConnection({
-  host: "localhost", // or your XAMPP server IP address
+  host: "localhost",
   user: "root",
   password: "",
   database: "quiz_db",
@@ -21,29 +20,29 @@ connection.connect((err) => {
   console.log("Connected to MySQL database!");
 });
 
-// Set up API routes
+// routes & middleware setuP
 app.use(cors());
 app.use(express.json());
-app.use("/api", routes);
+app.use("/api", require("./routers/routes"));
 
-// Handle invalid routes
+//invalid routes handler..
 app.use((req, res) => {
   res.status(404).json({ error: "Not Found" });
 });
 
-// Error handling middleware
+// Error handling middlewaree
 app.use((err, req, res, next) => {
   console.error("Error:", err);
   res.status(500).json({ error: "Something went wrong" });
 });
 
 // Start the server
-const port = 3000; // Or any other port number you prefer
+const port = 3000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
-// Close the database connection when the server is shutting down
+// Close db connection
 process.on("SIGINT", () => {
   connection.end((err) => {
     if (err) {
