@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const {
   getQuestionsRoute,
+  getRandomQuestionsRoute,
+  getQuestionByIdRoute,
   postQuestionRoute,
   postQuestionAnswerCombinedRoute,
 } = require("./routes/questions.route");
@@ -23,6 +25,12 @@ router.post("/answers/:questionId", updateUserAnswerRoute);
 
 // get all questions
 router.get("/questions", getQuestionsRoute);
+
+// random questions count
+router.get("/random_questions/:number", getRandomQuestionsRoute);
+
+// get question by Id
+router.get("/questions/:questionId", getQuestionByIdRoute);
 
 // get specific answer
 router.get("/answers/:questionId", getAnswerByIdRoute);

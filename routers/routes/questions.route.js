@@ -1,14 +1,44 @@
 const { connection } = require("../../db/dbConnect");
 
 const getQuestionsRoute = (req, res) => {
-  const sql =
-    "SELECT * FROM `questions` GROUP BY `id` ORDER BY RAND() LIMIT 0, 10";
+  const sql = "SELECT * FROM `questions`";
   connection.query(sql, (err, results) => {
     if (err) {
       console.error("Error fetching questions:", err);
       res.status(500).json({ error: "Something went wrong" });
     } else {
       res.json(results);
+    }
+  });
+};
+const getRandomQuestionsRoute = (req, res) => {
+  const number = req.params.number;
+  const sql =
+    "SELECT * FROM `questions` GROUP BY `id` ORDER BY RAND() LIMIT 0, ?";
+  connection.query(sql, [+number], (err, results) => {
+    if (err) {
+      console.error("Error fetching questions:", err);
+      res.status(500).json({ error: "Something went wrong" });
+    } else {
+      res.json(results);
+    }
+  });
+};
+
+const getQuestionByIdRoute = (req, res) => {
+  const questionId = req.params.questionId; // Use req.params.questionId to get the questionId
+  const sql = "SELECT * FROM questions where id = ?";
+  connection.query(sql, [questionId], (err, results) => {
+    if (err) {
+      console.error("Error fetching question:", err);
+      res.status(500).json({ error: "Something went wrong" });
+    } else {
+      if (results.length === 0) {
+        // If no question is found with the given questionId
+        res.status(404).json({ error: "Question not found" });
+      } else {
+        res.json(results[0]); // Use results[0] to send the single question object
+      }
     }
   });
 };
@@ -60,6 +90,8 @@ const postQuestionAnswerCombinedRoute = (req, res) => {
 
 module.exports = {
   getQuestionsRoute,
+  getQuestionByIdRoute,
+  getRandomQuestionsRoute,
   postQuestionRoute,
   postQuestionAnswerCombinedRoute,
 };

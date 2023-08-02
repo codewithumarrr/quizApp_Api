@@ -6,6 +6,7 @@ const app = express();
 
 // connection
 const connection = mysql.createConnection({
+  // host: "host.docker.internal",
   host: "localhost",
   user: "root",
   password: "",
