@@ -1,31 +1,29 @@
-const { connection } = require("../../db/dbConnect");
+const express = require("express");
+const router = express.Router();
+const Answer = require("../../models/answersModel");
 
-const getAnswerByIdRoute = (req, res) => {
+const getAnswerByIdRoute = async (req, res) => {
   const questionId = req.params.questionId;
-  const sql = "SELECT * FROM answers WHERE question_id = ?";
-  connection.query(sql, [questionId], (err, results) => {
-    if (err) {
-      console.error("Error fetching answers:", err);
-      res.status(500).json({ error: "Something went wrong" });
-    } else {
-      res.json(...results);
-    }
-  });
+  try {
+    const answers = await Answer.find({ question_id: questionId });
+    res.status(200).json(answers);
+  } catch (err) {
+    console.error("Error fetching answers:", err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
 };
 
-const getAnswersRoute = (req, res) => {
-  const sql = "SELECT * FROM answers";
-  connection.query(sql, (err, results) => {
-    if (err) {
-      console.error("Error fetching answers:", err);
-      res.status(500).json({ error: "Something went wrong" });
-    } else {
-      res.json(results);
-    }
-  });
+const getAnswersRoute = async (req, res) => {
+  try {
+    const answers = await Answer.find();
+    res.status(200).json(answers);
+  } catch (err) {
+    console.error("Error fetching answers:", err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
 };
 
-const updateUserAnswerRoute = (req, res) => {
+const updateUserAnswerRoute = async (req, res) => {
   const questionId = req.params.questionId;
   const userAnswer = req.body.userAnswer;
 
@@ -34,15 +32,22 @@ const updateUserAnswerRoute = (req, res) => {
     return;
   }
 
-  const sql = "UPDATE answers SET user_answer = ? WHERE question_id = ?";
-  connection.query(sql, [userAnswer, questionId], (err, result) => {
-    if (err) {
-      console.error("Error updating user answer:", err);
-      res.status(500).json({ error: "Something went wrong" });
+  try {
+    const answer = await Answer.findOneAndUpdate(
+      { question_id: questionId },
+      { user_answer: userAnswer },
+      { new: true }
+    );
+
+    if (!answer) {
+      res.status(404).json({ error: "Answer not found" });
     } else {
       res.json({ message: "User answer saved successfully" });
     }
-  });
+  } catch (err) {
+    console.error("Error updating user answer:", err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
 };
 
 module.exports = {

@@ -1,37 +1,23 @@
 const express = require("express");
-const mysql = require("mysql2");
 const cors = require("cors");
+const { connectDB, closeDBConnection } = require("./db/db");
+const routes = require("./routers/routes");
 
 const app = express();
 
-// connection
-const connection = mysql.createConnection({
-  // host: "host.docker.internal",
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "quiz_db",
-});
+connectDB();
 
-connection.connect((err) => {
-  if (err) {
-    console.error("Error connecting to MySQL database:", err);
-    return;
-  }
-  console.log("Connected to MySQL database!");
-});
-
-// routes & middleware setuP
+// Middlewares
 app.use(cors());
 app.use(express.json());
-app.use("/api", require("./routers/routes"));
+app.use("/api", routes);
 
-//invalid routes handler..
+// Invalid routes handler
 app.use((req, res) => {
   res.status(404).json({ error: "Not Found" });
 });
 
-// Error handling middlewaree
+// Error handling middleware
 app.use((err, req, res, next) => {
   console.error("Error:", err);
   res.status(500).json({ error: "Something went wrong" });
@@ -39,17 +25,14 @@ app.use((err, req, res, next) => {
 
 // Start the server
 const port = 3000;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
-// Close db connection
 process.on("SIGINT", () => {
-  connection.end((err) => {
-    if (err) {
-      console.error("Error closing the connection:", err);
-    }
-    console.log("Connection closed.");
-    process.exit();
-  });
+  closeDBConnection();
+});
+
+process.on("exit", () => {
+  closeDBConnection();
 });
